@@ -430,7 +430,7 @@ func _use_caching(_output_port: StringName, _graph: GaeaGraph) -> bool:
 ## Adds or sets data to the cache at GaeaNodeResource, then output_port index.
 ## This is called during [method traverse] if [method _use_caching] returns [code]true[/code],
 ## but can also be called in special cases where you want to manually add cached values.
-func _set_cached_data(output_port: StringName, graph: GaeaGraph, new_data:Dictionary) -> void:
+func _set_cached_data(output_port: StringName, graph: GaeaGraph, new_data:Variant) -> void:
 	var node_cache:Dictionary = graph.cache.get_or_add(self, {})
 	node_cache[output_port] = new_data
 
@@ -442,7 +442,7 @@ func _has_cached_data(output_port: StringName, graph: GaeaGraph) -> bool:
 
 # Gets cached data by GaeaNodeResource, then output_port index.
 # Assumes that data exists, will error out if it doesn't.
-func _get_cached_data(output_port: StringName, graph: GaeaGraph) -> Dictionary:
+func _get_cached_data(output_port: StringName, graph: GaeaGraph) -> Variant:
 	return graph.cache[self][output_port]
 #endregion
 

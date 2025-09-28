@@ -46,15 +46,16 @@ func _get_argument_hint(arg_name: StringName) -> Dictionary[String, Variant]:
 		_: return super(arg_name)
 
 func _get_output_ports_list() -> Array[StringName]: return [
-	&"grid_data", &"rooms"]
+	&"grid_data", &"rooms", &"start_room_index", &"end_room_index"]
 
-func _get_output_port_type(output_name: StringName) -> GaeaValue.Type: return TYPE_NIL as GaeaValue.Type
+func _get_output_port_type(output_name: StringName) -> GaeaValue.Type:
+	match output_name:
+		&"grid_data": return GaeaValue.Type.DATA
+		&"rooms": return GaeaValue.Type.RECT2I_ARRAY
+		&"start_room_index", &"end_room_index": return GaeaValue.Type.INT
+		_: return GaeaValue.Type.NULL
 
-func _get_output_port_display_name(output_name: StringName) -> String:
-	
-	return ""
-
-func _get_data(_output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant:
+func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant:
 	var rng: RandomNumberGenerator = define_rng(graph)
 	
 	var grid_size: Vector2i = Vector2i(area.size.x, area.size.y)
@@ -187,9 +188,12 @@ func _get_data(_output_port: StringName, area: AABB, graph: GaeaGraph) -> Varian
 	var start_room: int = longest_path_indexes[0]
 	var end_room: int = longest_path_indexes[1]
 	
+	var room_rects: Array[Rect2i]
+	
 	# Set Rects to Grid
 	for i in rooms.size():
 		var room: DungeonRoom = rooms[i]
+		room_rects.append(room.rect)
 		var bit_value: int = BIT_PATH
 		for y in range(room.rect.position.y, room.rect.end.y): for x in range(room.rect.position.x, room.rect.end.x):
 			grid[Vector3i(x, y, pos_z)] = bit_value
@@ -197,7 +201,12 @@ func _get_data(_output_port: StringName, area: AABB, graph: GaeaGraph) -> Varian
 	
 	
 	
-	return null
+	_set_cached_data(&"grid_data", graph, grid)
+	_set_cached_data(&"rooms", graph, room_rects)
+	_set_cached_data(&"start_room_index", graph, start_room)
+	_set_cached_data(&"end_room_index", graph, end_room)
+	
+	return _get_cached_data(output_port, graph)
 
 func _initialize_grid(size: Vector3i) -> void:
 	if grid: grid.clear()

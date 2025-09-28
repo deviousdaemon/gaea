@@ -16,6 +16,8 @@ enum Type {
 	VECTOR2I = TYPE_VECTOR2I, ## Like Vector2, but can only be [code]int[/code]s.
 	VECTOR3 = TYPE_VECTOR3, ## ([code]x[/code],[code]y[/code], [code]z[/code])
 	VECTOR3I = TYPE_VECTOR3I, ## Like Vector3, but can only be [code]int[/code]s.
+	# Stardusk
+	RECT2I_ARRAY = TYPE_ARRAY + TYPE_RECT2I, ## An [code]Array[/code] of [code]Rect2i[/code]s
 	# Simple types from 100 to 199
 	## Formatted the following way:
 	## [codeblock]
@@ -73,6 +75,8 @@ static func get_default_value(type: Type) -> Variant:
 			return Vector3.ZERO
 		Type.VECTOR3I:
 			return Vector3i.ZERO
+		Type.RECT2I_ARRAY:
+			return [] as Array[Rect2i]
 		# Simple types
 		Type.RANGE:
 			return {"min": 0.0, "max": 1.0} as Dictionary[String, float]
@@ -180,6 +184,8 @@ static func get_display_icon(type: Type) -> Texture2D:
 			return load("uid://cd0polwxfqhyi")
 		Type.VECTOR3:
 			return load("uid://bkknri7u8ghs4")
+		Type.RECT2I_ARRAY:
+			return load("uid://covr8rg5dbyfo")
 		# Simple types
 		Type.RANGE:
 			return load("uid://wx4ccwofr8yy")
@@ -213,6 +219,8 @@ static func get_default_slot_icon(type: Type) -> Texture2D:
 			return load("uid://bidpo1iw1t0vt")
 		Type.VECTOR3I, Type.VECTOR3:
 			return load("uid://dbvw3j8fnmhpu")
+		Type.RECT2I_ARRAY:
+			return load("uid://cnlpabw5vlm4r")
 		# Simple types
 		Type.RANGE:
 			return load("uid://dfsmxavxasx7x")
