@@ -16,8 +16,12 @@ enum Type {
 	VECTOR2I = TYPE_VECTOR2I, ## Like Vector2, but can only be [code]int[/code]s.
 	VECTOR3 = TYPE_VECTOR3, ## ([code]x[/code],[code]y[/code], [code]z[/code])
 	VECTOR3I = TYPE_VECTOR3I, ## Like Vector3, but can only be [code]int[/code]s.
-	# Stardusk
-	RECT2I_ARRAY = TYPE_ARRAY + TYPE_RECT2I, ## An [code]Array[/code] of [code]Rect2i[/code]s
+	#Stardusk
+	RECT2 = TYPE_RECT2,
+	RECT2I = TYPE_RECT2I,
+	ARRAY_RECT2 = TYPE_ARRAY + TYPE_RECT2,
+	ARRAY_RECT2I = TYPE_ARRAY + TYPE_RECT2I,
+	#End
 	# Simple types from 100 to 199
 	## Formatted the following way:
 	## [codeblock]
@@ -75,7 +79,8 @@ static func get_default_value(type: Type) -> Variant:
 			return Vector3.ZERO
 		Type.VECTOR3I:
 			return Vector3i.ZERO
-		Type.RECT2I_ARRAY:
+		#Stardusk
+		Type.ARRAY_RECT2I:
 			return [] as Array[Rect2i]
 		# Simple types
 		Type.RANGE:
@@ -184,7 +189,8 @@ static func get_display_icon(type: Type) -> Texture2D:
 			return load("uid://cd0polwxfqhyi")
 		Type.VECTOR3:
 			return load("uid://bkknri7u8ghs4")
-		Type.RECT2I_ARRAY:
+		#Stardusk
+		Type.ARRAY_RECT2I:
 			return load("uid://covr8rg5dbyfo")
 		# Simple types
 		Type.RANGE:
@@ -219,7 +225,8 @@ static func get_default_slot_icon(type: Type) -> Texture2D:
 			return load("uid://bidpo1iw1t0vt")
 		Type.VECTOR3I, Type.VECTOR3:
 			return load("uid://dbvw3j8fnmhpu")
-		Type.RECT2I_ARRAY:
+		#Stardusk
+		Type.ARRAY_RECT2I:
 			return load("uid://cnlpabw5vlm4r")
 		# Simple types
 		Type.RANGE:

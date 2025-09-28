@@ -615,11 +615,11 @@ func _is_point_outside_area(area: AABB, point: Vector3) -> bool:
 	return (point.x < area.position.x or point.y < area.position.y or point.z < area.position.z or
 			point.x > area.end.x or point.y > area.end.y or point.z > area.end.z)
 
-func define_rng(graph: GaeaGraph) -> RandomNumberGenerator:
-	var rng = RandomNumberGenerator.new()
-	rng.set_seed(graph.generator.seed + salt)
+func define_rng(graph: GaeaGraph) -> GaeaRNG:
+	#var rng = RandomNumberGenerator.new()
+	#rng.set_seed(graph.generator.seed + salt)
 	seed(graph.generator.seed + salt)
-	return rng
+	return GaeaRNG.new(graph.generator.seed + salt)
 #endregion
 
 

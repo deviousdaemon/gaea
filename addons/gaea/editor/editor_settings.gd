@@ -19,6 +19,8 @@ const CONFIGURABLE_SLOT_COLORS := {
 	GaeaValue.Type.VECTOR3: "vector_3",
 	GaeaValue.Type.VECTOR3I: "vector_3i",
 	GaeaValue.Type.RANGE: "range",
+	#Stardusk
+	#GaeaValue.Type.ARRAY_RECT2I: "array_rect2i",
 	GaeaValue.Type.MATERIAL: "material",
 	GaeaValue.Type.TEXTURE: "texture",
 	GaeaValue.Type.DATA: "data",
@@ -90,7 +92,7 @@ static func get_configured_output_color() -> Color:
 
 
 static func get_configured_color_for_value_type(value_type: GaeaValue.Type) -> Color:
-	if not CONFIGURABLE_SLOT_COLORS.has(value_type):
+	if not CONFIGURABLE_SLOT_COLORS.has(value_type): 
 		return Color.WHITE
 	var editor_interface = Engine.get_singleton("EditorInterface")
 	var settings = editor_interface.get_editor_settings()

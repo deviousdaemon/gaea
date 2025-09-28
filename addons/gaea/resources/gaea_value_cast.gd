@@ -55,6 +55,14 @@ static var _casts_methods: Dictionary[GaeaValue.Type, Dictionary] = {
 		GaeaValue.Type.VECTOR3:  func(value: Vector3i): return Vector3(float(value.x), float(value.y), float(value.z)),
 		GaeaValue.Type.RANGE:    func(value: Vector3i): return {"min": float(value.x), "max": float(value.y)},
 	},
+	#Stardusk
+	GaeaValue.Type.RECT2: {
+		GaeaValue.Type.RECT2I: func(value: Rect2): return Rect2i(value)
+	},
+	GaeaValue.Type.RECT2I: {
+		GaeaValue.Type.RECT2: func(value: Rect2i): return Rect2(value)
+	},
+	#End
 	GaeaValue.Type.RANGE: {
 		GaeaValue.Type.VECTOR2:  func(value: Dictionary): return Vector2(value.get("min"), value.get("max")),
 		GaeaValue.Type.VECTOR2I: func(value: Dictionary): return Vector2i(roundi(value.get("min")), roundi(value.get("max"))),

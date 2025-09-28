@@ -1,11 +1,11 @@
 @tool
 extends GaeaNodeVectorBase
-class_name GaeaNodeDecomposeRect
+class_name GaeaNodeDecomposeVector
 ## Decomposes vector to floats.
 
 
 func _get_title() -> String:
-	return "RectDecompose"
+	return "VectorDecompose"
 
 
 func _get_description() -> String:

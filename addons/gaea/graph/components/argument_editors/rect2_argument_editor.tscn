@@ -1,0 +1,148 @@
+[gd_scene load_steps=4 format=3 uid="uid://dpgw4wdiypiu0"]
+
+[ext_resource type="Script" uid="uid://dt831vfvgsv6o" path="res://addons/gaea/graph/components/argument_editors/rect2_argument_editor.gd" id="1_jybfa"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jybfa"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jybfa"]
+content_margin_left = 1.0
+content_margin_right = 1.0
+bg_color = Color(0.22, 0.22, 0.22, 0.6431373)
+corner_radius_top_left = 1
+corner_radius_top_right = 1
+corner_radius_bottom_right = 1
+corner_radius_bottom_left = 1
+anti_aliasing = false
+
+[node name="Rect2iParameter" type="HBoxContainer"]
+offset_right = 42.0
+offset_bottom = 40.0
+theme_override_constants/separation = 8
+script = ExtResource("1_jybfa")
+
+[node name="Label" type="RichTextLabel" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_styles/normal = SubResource("StyleBoxEmpty_jybfa")
+bbcode_enabled = true
+text = "Label"
+fit_content = true
+autowrap_mode = 0
+
+[node name="VSeparator" type="VSeparator" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 2
+theme_override_styles/separator = SubResource("StyleBoxFlat_jybfa")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Start"
+
+[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(12, 0)
+layout_mode = 2
+
+[node name="PosXLabel" type="Label" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "x"
+
+[node name="PosXSpinbox" type="SpinBox" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 16.0
+expand_to_text_length = true
+
+[node name="PosYLabel" type="Label" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "y"
+
+[node name="PosYSpinbox" type="SpinBox" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 16.0
+expand_to_text_length = true
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer2/HBoxContainer2"]
+layout_mode = 2
+text = "End"
+
+[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer2/HBoxContainer2"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+
+[node name="EndXLabel" type="Label" parent="VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "x"
+
+[node name="EndXSpinbox" type="SpinBox" parent="VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 16.0
+expand_to_text_length = true
+
+[node name="EndYLabel" type="Label" parent="VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "y"
+
+[node name="EndYSpinbox" type="SpinBox" parent="VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 16.0
+expand_to_text_length = true
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer3/HBoxContainer3"]
+layout_mode = 2
+text = "Size"
+
+[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer3/HBoxContainer3"]
+custom_minimum_size = Vector2(19, 0)
+layout_mode = 2
+
+[node name="SizeXLabel" type="Label" parent="VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "x"
+
+[node name="SizeXSpinbox" type="SpinBox" parent="VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 16.0
+expand_to_text_length = true
+
+[node name="SizeYLabel" type="Label" parent="VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "y"
+
+[node name="SizeYSpinbox" type="SpinBox" parent="VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 16.0
+expand_to_text_length = true

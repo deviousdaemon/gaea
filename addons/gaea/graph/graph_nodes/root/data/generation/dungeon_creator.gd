@@ -2,8 +2,8 @@
 extends GaeaNodeResource
 class_name DungeonCreator
 
-const BIT_PATH: float = 0.0
-const BIT_WALL: float = 1.0
+const BIT_PATH: float = 1.0
+const BIT_WALL: float = 0.0
 
 const ROOM_ATTEMPT_MULT: int = 64
 const EXTRA_ROOM_CONNECTION_MAX: float = 6.75
@@ -41,22 +41,25 @@ func _get_argument_hint(arg_name: StringName) -> Dictionary[String, Variant]:
 	match arg_name:
 		&"room_size_min": return {min=Vector2i(3, 3)}
 		&"min_room_spacing": return {min=Vector2i(4, 4)}
-		&"room_density": return {min=0.0,max=1.0}
+		&"room_density": return {min=0.01,max=1.0}
 		&"room_extra_connection_chance": return {min=0.0,max=EXTRA_ROOM_CONNECTION_MAX, suffix="%"}
 		_: return super(arg_name)
 
 func _get_output_ports_list() -> Array[StringName]: return [
-	&"grid_data", &"rooms", &"start_room_index", &"end_room_index"]
+	&"grid_data",
+	#&"rooms",
+	&"start_room_index",
+	&"end_room_index"]
 
 func _get_output_port_type(output_name: StringName) -> GaeaValue.Type:
 	match output_name:
 		&"grid_data": return GaeaValue.Type.DATA
-		&"rooms": return GaeaValue.Type.RECT2I_ARRAY
+		#&"rooms": return GaeaValue.Type.RECT2I_ARRAY
 		&"start_room_index", &"end_room_index": return GaeaValue.Type.INT
 		_: return GaeaValue.Type.NULL
 
 func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant:
-	var rng: RandomNumberGenerator = define_rng(graph)
+	var rng: GaeaRNG = define_rng(graph)
 	
 	var grid_size: Vector2i = Vector2i(area.size.x, area.size.y)
 	var pos_z: int = area.position.z
@@ -95,7 +98,7 @@ func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant
 	
 	
 	if not is_equal_approx(room_density, 1.0):
-		var max_rooms: int = floori(float(rooms.size()) * room_density)
+		var max_rooms: int = maxi(floori(float(rooms.size()) * room_density), 2)
 		
 		while rooms.size() > max_rooms:
 			rooms.remove_at(rng.randi() % rooms.size())
@@ -194,15 +197,14 @@ func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant
 	for i in rooms.size():
 		var room: DungeonRoom = rooms[i]
 		room_rects.append(room.rect)
-		var bit_value: int = BIT_PATH
+		var bit_value: int = room.index + 1
 		for y in range(room.rect.position.y, room.rect.end.y): for x in range(room.rect.position.x, room.rect.end.x):
 			grid[Vector3i(x, y, pos_z)] = bit_value
 			pass
 	
 	
-	
 	_set_cached_data(&"grid_data", graph, grid)
-	_set_cached_data(&"rooms", graph, room_rects)
+	#_set_cached_data(&"rooms", graph, room_rects)
 	_set_cached_data(&"start_room_index", graph, start_room)
 	_set_cached_data(&"end_room_index", graph, end_room)
 	
@@ -210,10 +212,10 @@ func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant
 
 func _initialize_grid(size: Vector3i) -> void:
 	if grid: grid.clear()
-	for x in size.x:
-		for y in size.y:
-			for z in size.z:
-				grid[Vector3i(x, y, z)] = BIT_WALL
+	#for x in size.x:
+		#for y in size.y:
+			#for z in size.z:
+				#grid[Vector3i(x, y, z)] = BIT_WALL
 	pass
 
 func __sort_clockwise(a: DungeonRoom, b: DungeonRoom, center: Vector2i) -> bool:
@@ -468,9 +470,9 @@ class DungeonRoom extends RefCounted:
 		return sides
 
 class DungeonAStar extends AStarGrid2D:
-	var rng: RNG
+	var rng: GaeaRNG
 
-	func _init(_rng: RNG) -> void:
+	func _init(_rng: GaeaRNG) -> void:
 		rng = _rng
 		pass
 
