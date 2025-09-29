@@ -2,22 +2,29 @@
 extends GaeaNodeResource
 class_name DungeonCreator
 
-const BIT_PATH: float = 1.0
-const BIT_WALL: float = 0.0
+const _BIT_PATH: float = 1.0
+const _BIT_WALL: float = 0.0
 
-const ROOM_ATTEMPT_MULT: int = 64
-const EXTRA_ROOM_CONNECTION_MAX: float = 6.75
+const _ROOM_ATTEMPT_MULT: int = 64
+const _EXTRA_ROOM_CONNECTION_MAX: float = 6.75
 
 var room_size_min: Vector2i
 var room_size_max: Vector2i
 var min_room_spacing: Vector2i
-var max_room_attempts: int
 var room_density: float
 var room_extra_connection_chance: float
 
-var grid: Dictionary[Vector3i, float]
+var _max_room_attempts: int
+var _grid: Dictionary[Vector3i, float]
 
 func _get_title() -> String: return "DungeonCreator"
+
+func _get_description() -> String:
+	return """Generates Rooms and Hallways.
+Returns a [code]Dictionary[Vector3i, room_index + 1 or 0][/code],
+a [code]Array[Rect2i][/code] of rooms,
+the starting room index,
+and the ending room index"""
 
 func _get_arguments_list() -> Array[StringName]:
 	return [ &"room_size_min", &"room_size_max", &"min_room_spacing", &"room_density", &"room_extra_connection_chance" ]
@@ -42,19 +49,19 @@ func _get_argument_hint(arg_name: StringName) -> Dictionary[String, Variant]:
 		&"room_size_min": return {min=Vector2i(3, 3)}
 		&"min_room_spacing": return {min=Vector2i(4, 4)}
 		&"room_density": return {min=0.01,max=1.0}
-		&"room_extra_connection_chance": return {min=0.0,max=EXTRA_ROOM_CONNECTION_MAX, suffix="%"}
+		&"room_extra_connection_chance": return {min=0.0,max=_EXTRA_ROOM_CONNECTION_MAX, suffix="%"}
 		_: return super(arg_name)
 
 func _get_output_ports_list() -> Array[StringName]: return [
 	&"grid_data",
-	#&"rooms",
+	&"rooms",
 	&"start_room_index",
 	&"end_room_index"]
 
 func _get_output_port_type(output_name: StringName) -> GaeaValue.Type:
 	match output_name:
 		&"grid_data": return GaeaValue.Type.DATA
-		#&"rooms": return GaeaValue.Type.RECT2I_ARRAY
+		&"rooms": return GaeaValue.Type.ARRAY_RECT2I
 		&"start_room_index", &"end_room_index": return GaeaValue.Type.INT
 		_: return GaeaValue.Type.NULL
 
@@ -69,7 +76,7 @@ func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant
 	room_size_min = _get_arg(&"room_size_min", area, graph) as Vector2i
 	room_size_max = _get_arg(&"room_size_max", area, graph) as Vector2i
 	min_room_spacing = _get_arg(&"min_room_spacing", area, graph) as Vector2i
-	max_room_attempts = floori(sqrt(grid_size.x * grid_size.y)) * ROOM_ATTEMPT_MULT
+	_max_room_attempts = floori(sqrt(grid_size.x * grid_size.y)) * _ROOM_ATTEMPT_MULT
 	room_density = _get_arg(&"room_density", area, graph) as float
 	room_extra_connection_chance = (_get_arg(&"room_extra_connection_chance", area, graph) as float) / 100.0
 	
@@ -77,7 +84,7 @@ func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant
 	
 	var attempt: int = 0
 	
-	while attempt < max_room_attempts:
+	while attempt < _max_room_attempts:
 		var r_size: Vector2i = rng.rand_vector2i(room_size_min, room_size_max)
 		var r_pos: Vector2i = rng.rand_vector2i_odd(Vector2i(2, 2), grid_size - r_size - Vector2i(3, 3))
 		var r_rect: Rect2i = Rect2i(r_pos, r_size)
@@ -182,7 +189,7 @@ func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant
 		room_b.connections[room_a] = path.size() + dist_thru_room_b[dist_thru_room_b.max_axis_index()]
 		
 		for p in path:
-			grid[Vector3i(p.x, p.y, pos_z)] = BIT_PATH
+			_grid[Vector3i(p.x, p.y, pos_z)] = _BIT_PATH
 			pass
 	
 	
@@ -199,23 +206,23 @@ func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant
 		room_rects.append(room.rect)
 		var bit_value: int = room.index + 1
 		for y in range(room.rect.position.y, room.rect.end.y): for x in range(room.rect.position.x, room.rect.end.x):
-			grid[Vector3i(x, y, pos_z)] = bit_value
+			_grid[Vector3i(x, y, pos_z)] = bit_value
 			pass
 	
 	
-	_set_cached_data(&"grid_data", graph, grid)
-	#_set_cached_data(&"rooms", graph, room_rects)
+	_set_cached_data(&"grid_data", graph, _grid)
+	_set_cached_data(&"rooms", graph, room_rects)
 	_set_cached_data(&"start_room_index", graph, start_room)
 	_set_cached_data(&"end_room_index", graph, end_room)
 	
 	return _get_cached_data(output_port, graph)
 
 func _initialize_grid(size: Vector3i) -> void:
-	if grid: grid.clear()
+	if _grid: _grid.clear()
 	#for x in size.x:
 		#for y in size.y:
 			#for z in size.z:
-				#grid[Vector3i(x, y, z)] = BIT_WALL
+				#_grid[Vector3i(x, y, z)] = _BIT_WALL
 	pass
 
 func __sort_clockwise(a: DungeonRoom, b: DungeonRoom, center: Vector2i) -> bool:

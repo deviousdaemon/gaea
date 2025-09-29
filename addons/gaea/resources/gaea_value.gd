@@ -80,6 +80,12 @@ static func get_default_value(type: Type) -> Variant:
 		Type.VECTOR3I:
 			return Vector3i.ZERO
 		#Stardusk
+		Type.RECT2:
+			return Rect2()
+		Type.RECT2I:
+			return Rect2i()
+		Type.ARRAY_RECT2:
+			return [] as Array[Rect2]
 		Type.ARRAY_RECT2I:
 			return [] as Array[Rect2i]
 		# Simple types
@@ -119,6 +125,12 @@ static func from_variant_type(type: Variant.Type, _hint: PropertyHint = PROPERTY
 			return Type.VECTOR3I
 		TYPE_VECTOR3:
 			return Type.VECTOR3
+		#Stardusk
+		TYPE_RECT2:
+			return Type.RECT2
+		TYPE_RECT2I:
+			return Type.RECT2I
+		#End
 		TYPE_OBJECT:
 			if hint_string == "GaeaMaterial":
 				return Type.MATERIAL
@@ -156,6 +168,9 @@ static func get_default_color(type: Type) -> Color:
 			return Color("00bfff") # LIGHT BLUE
 		Type.VECTOR3I, Type.VECTOR3:
 			return Color("8e44ad") # MAGENTA
+		#Stardusk
+		Type.ARRAY_RECT2, Type.ARRAY_RECT2I, Type.RECT2, Type.RECT2I:
+			return Color("#00ffdb") # TEAL
 		# Simple types
 		Type.RANGE:
 			return Color("f04c7f") # PINK
@@ -190,7 +205,11 @@ static func get_display_icon(type: Type) -> Texture2D:
 		Type.VECTOR3:
 			return load("uid://bkknri7u8ghs4")
 		#Stardusk
-		Type.ARRAY_RECT2I:
+		Type.RECT2:
+			return load("uid://ttk2j78hpfpw")
+		Type.RECT2I:
+			return load("uid://coh3qh4exp0qn")
+		Type.ARRAY_RECT2, Type.ARRAY_RECT2I:
 			return load("uid://covr8rg5dbyfo")
 		# Simple types
 		Type.RANGE:
@@ -226,7 +245,9 @@ static func get_default_slot_icon(type: Type) -> Texture2D:
 		Type.VECTOR3I, Type.VECTOR3:
 			return load("uid://dbvw3j8fnmhpu")
 		#Stardusk
-		Type.ARRAY_RECT2I:
+		Type.RECT2, Type.RECT2I:
+			return load("uid://x4h7rowd01e0")
+		Type.ARRAY_RECT2, Type.ARRAY_RECT2I:
 			return load("uid://cnlpabw5vlm4r")
 		# Simple types
 		Type.RANGE:
@@ -249,6 +270,9 @@ static func get_editor_for_type(for_type: GaeaValue.Type) -> PackedScene:
 			return preload("uid://dp7blnx7abb5e")
 		GaeaValue.Type.VECTOR2, GaeaValue.Type.VECTOR2I, GaeaValue.Type.VECTOR3, GaeaValue.Type.VECTOR3I:
 			return preload("uid://mlwupvg8a886")
+		#Stardusk
+		GaeaValue.Type.RECT2, GaeaValue.Type.RECT2I:
+			return preload("uid://dpgw4wdiypiu0")
 		GaeaValue.Type.VARIABLE_NAME:
 			return preload("uid://bn8i1l4q13pdw")
 		GaeaValue.Type.RANGE:

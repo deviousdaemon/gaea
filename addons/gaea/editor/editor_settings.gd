@@ -20,7 +20,11 @@ const CONFIGURABLE_SLOT_COLORS := {
 	GaeaValue.Type.VECTOR3I: "vector_3i",
 	GaeaValue.Type.RANGE: "range",
 	#Stardusk
-	#GaeaValue.Type.ARRAY_RECT2I: "array_rect2i",
+	GaeaValue.Type.RECT2: "rect_2",
+	GaeaValue.Type.RECT2I: "rect_2i",
+	GaeaValue.Type.ARRAY_RECT2: "array_rect_2",
+	GaeaValue.Type.ARRAY_RECT2I: "array_rect_2i",
+	#END
 	GaeaValue.Type.MATERIAL: "material",
 	GaeaValue.Type.TEXTURE: "texture",
 	GaeaValue.Type.DATA: "data",

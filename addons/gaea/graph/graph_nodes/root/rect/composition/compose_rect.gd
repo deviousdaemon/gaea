@@ -20,10 +20,6 @@ func _get_arguments_list() -> Array[StringName]:
 		InputType.FULL:
 			return [&"x", &"y", &"width", &"height"]
 			pass
-		#VectorType.VECTOR2, VectorType.VECTOR2I:
-			#return [&"x", &"y"]
-		#VectorType.VECTOR3, VectorType.VECTOR3I:
-			#return [&"x", &"y", &"z"]
 	return []
 
 
@@ -68,27 +64,18 @@ func _get_tree_items() -> Array[GaeaNodeResource]:
 
 
 func _get_data(_output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant:
-	match get_enum_selection(0):
-		VectorType.VECTOR2:
-			return Vector2(
-				_get_arg(&"x", area, graph),
-				_get_arg(&"y", area, graph),
-			)
-		VectorType.VECTOR3:
-			return Vector3(
-				_get_arg(&"x", area, graph),
-				_get_arg(&"y", area, graph),
-				_get_arg(&"z", area, graph),
-			)
-		VectorType.VECTOR2I:
-			return Vector2i(
-				_get_arg(&"x", area, graph),
-				_get_arg(&"y", area, graph),
-			)
-		VectorType.VECTOR3I:
-			return Vector3i(
-				_get_arg(&"x", area, graph),
-				_get_arg(&"y", area, graph),
-				_get_arg(&"z", area, graph),
-			)
+	match get_enum_selection(1):
+		InputType.VECTOR:
+			match get_enum_selection(0):
+				RectType.RECT2:
+					return Rect2(_get_arg(&"position", area, graph), _get_arg(&"size", area, graph))
+				RectType.RECT2I:
+					return Rect2i(_get_arg(&"position", area, graph), _get_arg(&"size", area, graph))
+		InputType.FULL:
+			match get_enum_selection(0):
+				RectType.RECT2:
+					return Rect2(_get_arg(&"x", area, graph), _get_arg(&"y", area, graph), _get_arg(&"width", area, graph), _get_arg(&"height", area, graph))
+				RectType.RECT2I:
+					return Rect2i(_get_arg(&"x", area, graph), _get_arg(&"y", area, graph), _get_arg(&"width", area, graph), _get_arg(&"height", area, graph))
+			pass
 	return null
