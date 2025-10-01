@@ -14,15 +14,14 @@ var min_room_spacing: Vector2i
 var room_density: float
 var room_extra_connection_chance: float
 
-var _max_room_attempts: int
 var _grid: Dictionary[Vector3i, float]
 
 func _get_title() -> String: return "DungeonCreator"
 
 func _get_description() -> String:
 	return """Generates Rooms and Hallways.
-Returns a [code]Dictionary[Vector3i, room_index + 1 or 0][/code],
-a [code]Array[Rect2i][/code] of rooms,
+Returns a [code]Dictionary[Vector3i, room_index + 1 or 0][/code] of [data],
+a [code]Array[Rect2i][/code] of [rooms],
 the starting room index,
 and the ending room index"""
 
@@ -61,7 +60,7 @@ func _get_output_ports_list() -> Array[StringName]: return [
 func _get_output_port_type(output_name: StringName) -> GaeaValue.Type:
 	match output_name:
 		&"grid_data": return GaeaValue.Type.DATA
-		&"rooms": return GaeaValue.Type.ARRAY_RECT2I
+		&"rooms": return GaeaValue.Type.ROOMS
 		&"start_room_index", &"end_room_index": return GaeaValue.Type.INT
 		_: return GaeaValue.Type.NULL
 
@@ -71,38 +70,16 @@ func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant
 	var grid_size: Vector2i = Vector2i(area.size.x, area.size.y)
 	var pos_z: int = area.position.z
 	
-	_initialize_grid(area.size)
+	_grid.clear()
 	
 	room_size_min = _get_arg(&"room_size_min", area, graph) as Vector2i
 	room_size_max = _get_arg(&"room_size_max", area, graph) as Vector2i
 	min_room_spacing = _get_arg(&"min_room_spacing", area, graph) as Vector2i
-	_max_room_attempts = floori(sqrt(grid_size.x * grid_size.y)) * _ROOM_ATTEMPT_MULT
+	var max_room_attempts: int = pow(floori(sqrt(grid_size.x * grid_size.y)) * _ROOM_ATTEMPT_MULT, 1.25)
 	room_density = _get_arg(&"room_density", area, graph) as float
 	room_extra_connection_chance = (_get_arg(&"room_extra_connection_chance", area, graph) as float) / 100.0
 	
-	var rooms: Array[DungeonRoom]
-	
-	var attempt: int = 0
-	
-	while attempt < _max_room_attempts:
-		var r_size: Vector2i = rng.rand_vector2i(room_size_min, room_size_max)
-		var r_pos: Vector2i = rng.rand_vector2i_odd(Vector2i(2, 2), grid_size - r_size - Vector2i(3, 3))
-		var r_rect: Rect2i = Rect2i(r_pos, r_size)
-		
-		var intersected: bool = false
-		
-		for i in rooms:
-			if i.rect.intersects(r_rect.grow_individual(min_room_spacing.x, min_room_spacing.y, min_room_spacing.x, min_room_spacing.y)):
-				intersected = true
-				break
-		
-		if not intersected:
-			rooms.append(DungeonRoom.new(r_rect))
-		
-		attempt += 1
-		pass
-	
-	
+	var rooms: Array[DungeonRoom] = _generate_rooms(rng, grid_size, max_room_attempts)
 	
 	if not is_equal_approx(room_density, 1.0):
 		var max_rooms: int = maxi(floori(float(rooms.size()) * room_density), 2)
@@ -217,13 +194,51 @@ func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant
 	
 	return _get_cached_data(output_port, graph)
 
-func _initialize_grid(size: Vector3i) -> void:
-	if _grid: _grid.clear()
-	#for x in size.x:
-		#for y in size.y:
-			#for z in size.z:
-				#_grid[Vector3i(x, y, z)] = _BIT_WALL
-	pass
+func _generate_rooms(rng: GaeaRNG, grid_size: Vector2i, max_room_attempts: int) -> Array[DungeonRoom]:
+	const MAX_CANDIDATES: int = 8
+	
+	var rooms: Array[DungeonRoom]
+	
+	var attempt: int = 0
+	
+	while attempt < max_room_attempts:
+		
+		var candidates: Array[Rect2i]
+		
+		while candidates.size() < MAX_CANDIDATES and attempt < max_room_attempts:
+		
+			var r_size: Vector2i = rng.rand_vector2i(room_size_min, room_size_max)
+			var r_pos: Vector2i = rng.rand_vector2i_odd(Vector2i(2, 2), grid_size - r_size - Vector2i(3, 3))
+			var r_rect: Rect2i = Rect2i(r_pos, r_size)
+			
+			var intersected: bool = false
+			
+			for i in rooms:
+				if i.rect.intersects(r_rect.grow_individual(min_room_spacing.x, min_room_spacing.y, min_room_spacing.x, min_room_spacing.y)):
+					intersected = true
+					break
+			
+			if not intersected:
+				candidates.append(r_rect)
+			
+			attempt += 1
+		
+		if attempt >= max_room_attempts: break
+		
+		var largest_area: int = -1
+		var largest_rect: Rect2i
+		
+		for rect in candidates:
+			if rect.get_area() > largest_area:
+				largest_area = rect.get_area()
+				largest_rect = rect
+		
+		rooms.append(DungeonRoom.new(largest_rect))
+		
+		pass
+	
+	return rooms
+
 
 func __sort_clockwise(a: DungeonRoom, b: DungeonRoom, center: Vector2i) -> bool:
 	return Vector2(a.get_center() - center).angle() < Vector2(b.get_center() - center).angle()

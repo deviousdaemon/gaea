@@ -19,8 +19,7 @@ enum Type {
 	#Stardusk
 	RECT2 = TYPE_RECT2,
 	RECT2I = TYPE_RECT2I,
-	ARRAY_RECT2 = TYPE_ARRAY + TYPE_RECT2,
-	ARRAY_RECT2I = TYPE_ARRAY + TYPE_RECT2I,
+	ROOMS = TYPE_ARRAY + TYPE_RECT2I,
 	#End
 	# Simple types from 100 to 199
 	## Formatted the following way:
@@ -84,9 +83,7 @@ static func get_default_value(type: Type) -> Variant:
 			return Rect2()
 		Type.RECT2I:
 			return Rect2i()
-		Type.ARRAY_RECT2:
-			return [] as Array[Rect2]
-		Type.ARRAY_RECT2I:
+		Type.ROOMS:
 			return [] as Array[Rect2i]
 		# Simple types
 		Type.RANGE:
@@ -169,7 +166,7 @@ static func get_default_color(type: Type) -> Color:
 		Type.VECTOR3I, Type.VECTOR3:
 			return Color("8e44ad") # MAGENTA
 		#Stardusk
-		Type.ARRAY_RECT2, Type.ARRAY_RECT2I, Type.RECT2, Type.RECT2I:
+		Type.RECT2, Type.RECT2I:
 			return Color("#00ffdb") # TEAL
 		# Simple types
 		Type.RANGE:
@@ -209,8 +206,8 @@ static func get_display_icon(type: Type) -> Texture2D:
 			return load("uid://ttk2j78hpfpw")
 		Type.RECT2I:
 			return load("uid://coh3qh4exp0qn")
-		Type.ARRAY_RECT2, Type.ARRAY_RECT2I:
-			return load("uid://covr8rg5dbyfo")
+		Type.ROOMS:
+			return load("uid://c77teu4hn8cuw")
 		# Simple types
 		Type.RANGE:
 			return load("uid://wx4ccwofr8yy")
@@ -247,8 +244,6 @@ static func get_default_slot_icon(type: Type) -> Texture2D:
 		#Stardusk
 		Type.RECT2, Type.RECT2I:
 			return load("uid://x4h7rowd01e0")
-		Type.ARRAY_RECT2, Type.ARRAY_RECT2I:
-			return load("uid://cnlpabw5vlm4r")
 		# Simple types
 		Type.RANGE:
 			return load("uid://dfsmxavxasx7x")
@@ -257,7 +252,7 @@ static func get_default_slot_icon(type: Type) -> Texture2D:
 		Type.TEXTURE:
 			return load("uid://ccqq5l0ruur37")
 		# Dictionary types
-		Type.DATA:
+		Type.DATA, Type.ROOMS:
 			return load("uid://yo87adchyr3w")
 		Type.MAP:
 			return load("uid://d2rmsal7c6sdi")
