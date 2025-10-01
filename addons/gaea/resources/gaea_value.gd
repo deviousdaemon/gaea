@@ -50,6 +50,11 @@ static func is_wireable(type: Type) -> bool:
 	return type > 0 and type < 300
 
 
+## Returns [code]true[/code] if a connection of a [param from] output and a [param to] input is valid.
+static func is_valid_connection(from: GaeaValue.Type, to: GaeaValue.Type) -> bool:
+	return from == to or (GaeaValueCast.get_cast_methods().has(from) and GaeaValueCast.get_cast_methods().get(from).has(to))
+
+
 ## Returns whether [param type] can be previewed in the editor.
 static func has_preview(type: Type) -> bool:
 	return type == Type.MAP or type == Type.DATA

@@ -50,7 +50,7 @@ func populate(selected: Array) -> void:
 		var resource: GaeaNodeResource = node.resource
 		if resource is GaeaNodeParameter:
 			var data: GaeaGraph = panel.get_selected_generator().data
-			var parameter: Dictionary = data.parameters.get(node.get_arg_value("name"), {})
+			var parameter: Dictionary = data.get_parameter_dictionary(node.get_arg_value("name"))
 			if parameter.get("value") is Resource:
 				add_separator()
 				add_item("Open In Inspector", Action.OPEN_IN_INSPECTOR)
@@ -81,6 +81,7 @@ func _on_id_pressed(id: int) -> void:
 			var node: GraphElement = selected.front()
 			if node is GaeaGraphFrame:
 				node.set_tint_color_enabled(is_item_checked(idx))
+				node.generator.data.set_node_data_value(&"tint_color_enabled", is_item_checked(idx), node.id)
 		Action.ENABLE_AUTO_SHRINK:
 			set_item_checked(idx, not is_item_checked(idx))
 			var selected: Array = graph_edit.get_selected()
@@ -91,14 +92,13 @@ func _on_id_pressed(id: int) -> void:
 			var selected: Array = graph_edit.get_selected()
 			for node: GraphElement in selected:
 				if graph_edit.attached_elements.has(node.name):
-					graph_edit.detach_graph_element_from_frame(node.name)
-					graph_edit.attached_elements.erase(node.name)
+					graph_edit.detach_element_from_frame(node.name)
 		Action.OPEN_IN_INSPECTOR:
 			var node: GaeaGraphNode = graph_edit.get_selected().front()
 			var resource: GaeaNodeResource = node.resource
 			if resource is GaeaNodeParameter:
 				var data: GaeaGraph = panel.get_selected_generator().data
-				var parameter: Dictionary = data.parameters.get(node.get_arg_value("name"), {})
+				var parameter: Dictionary = data.get_parameter_dictionary(node.get_arg_value("name"))
 				var value: Variant = parameter.get("value")
 				if value is Resource and is_instance_valid(value):
 					EditorInterface.edit_resource(value)

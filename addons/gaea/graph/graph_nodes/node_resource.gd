@@ -45,7 +45,7 @@ const GAEA_MATERIAL_GRADIENT_HINT := "Resource that maps values from 0.0-1.0 to 
 var connections: Array[Dictionary]
 ## The related [GaeaGraphNode] for editing in the Gaea graph editor.
 ## This is null during runtime.
-var node: GaeaGraphNode
+var node: GraphElement
 ## A Dictionary holding the values of the arguments
 ## where the keys are their names.
 var arguments: Dictionary
@@ -54,6 +54,8 @@ var enum_selections: Array
 ## An additional value added to the generation's seed to prevent
 ## duplicates of the same node from having the same randomness. (See [member GaeaGenerator.seed]).
 var salt: int = 0
+## Id in the [GaeaGraph] save data.
+var id: int = 0
 ## If empty, [method _get_title] will be used instead.
 var tree_name_override: String = "" : set = set_tree_name_override
 @export_storage var default_value_overrides: Dictionary[StringName, Variant]
@@ -202,6 +204,11 @@ func is_available() -> bool:
 	return _is_available()
 
 
+## Public version of [method _get_custom_saved_data]. Prefer to override that method over this one.
+func get_custom_saved_data() -> Dictionary[StringName, Variant]:
+	return _get_custom_saved_data()
+
+
 ## Override this method to define the name shown in the title bar of this node.
 ## Defining this method is [b]required[/b].
 @abstract func _get_title() -> String;
@@ -324,6 +331,11 @@ func _is_available() -> bool:
 	return not get_script().is_abstract()
 
 
+## Override to append custom data to the saved data in [GaeaGraph._node_data].
+func _get_custom_saved_data() -> Dictionary[StringName, Variant]:
+	return {}
+
+
 func set_enum_value(enum_idx: int, option_value: int) -> void:
 	if enum_idx >= enum_selections.size():
 		for idx in _get_enums_count():
@@ -354,6 +366,9 @@ func _on_argument_value_changed(arg_name: StringName, new_value: Variant) -> voi
 
 
 
+
+
+
 #region Args
 ## Returns the value of the argument of [param name]. Pass in [param graph] to allow overriding with input slots.[br]
 ## [param area] is used for values of the type Data or Map. (See [enum GaeaValue.Type]).
@@ -362,8 +377,8 @@ func _get_arg(arg_name: StringName, area: AABB, graph: GaeaGraph) -> Variant:
 
 	var connection := _get_argument_connection(arg_name)
 	if not connection.is_empty():
-		var connected_idx = connection.from_node
-		var connected_node = graph.resources[connected_idx]
+		var connected_id = connection.from_node
+		var connected_node = graph.get_node(connected_id)
 		var connected_output = connected_node.connection_idx_to_output(connection.from_port)
 		var connected_data = connected_node.traverse(
 			connected_output,
@@ -380,7 +395,7 @@ func _get_arg(arg_name: StringName, area: AABB, graph: GaeaGraph) -> Variant:
 			else:
 				return GaeaValueCast.cast_value(connected_type, _get_argument_type(arg_name), connected_value)
 		else:
-			_log_error("Could not get data from previous node, using default value instead.", graph, connected_idx)
+			_log_error("Could not get data from previous node, using default value instead.", graph, connected_id)
 			return get_argument_default_value(arg_name)
 
 	return arguments.get(arg_name, get_argument_default_value(arg_name))
@@ -468,7 +483,7 @@ func _get_input_resource(arg_name: StringName, graph: GaeaGraph) -> GaeaNodeReso
 	if connection.is_empty() or connection.from_node == -1:
 		return null
 
-	var data_input_resource: GaeaNodeResource = graph.resources.get(connection.from_node)
+	var data_input_resource: GaeaNodeResource = graph.get_node(connection.from_node)
 	if not is_instance_valid(data_input_resource):
 		return null
 
@@ -477,6 +492,14 @@ func _get_input_resource(arg_name: StringName, graph: GaeaGraph) -> GaeaNodeReso
 
 
 #region Argument Connections
+## Returns the [StringName] corresponding to [param argument_idx].
+func connection_idx_to_argument(argument_idx: int) -> StringName:
+	var filtered_argument_list := _get_arguments_list().filter(_filter_has_input)
+	if filtered_argument_list.size() <= argument_idx:
+		return &""
+	return filtered_argument_list[argument_idx]
+
+
 func _get_argument_connection(arg_name: StringName) -> Dictionary:
 	var idx = _get_arguments_list().filter(_filter_has_input).find(arg_name)
 	if idx == -1:
@@ -547,9 +570,9 @@ func _log_arg(arg:String, graph: GaeaGraph):
 func _log_error(message:String, graph: GaeaGraph, node_idx: int = -1):
 	if node_idx >= 0:
 		printerr("%s:%s in node '%s' - %s" % [
-			graph.resources[node_idx].resource_path,
-			graph.node_data[node_idx].position,
-			graph.resources[node_idx].get_title(),
+			graph.get_node(node_idx).resource_path,
+			graph.get_node_data(node_idx).position,
+			graph.get_node(node_idx).get_title(),
 			message,
 		])
 	else:
@@ -623,7 +646,11 @@ func define_rng(graph: GaeaGraph) -> GaeaRNG:
 #endregion
 
 
+func load_save_data(saved_data: Dictionary) -> void:
+	_load_save_data(saved_data)
+
+
 func _load_save_data(saved_data: Dictionary) -> void:
-	salt = saved_data.get("salt", 0)
-	arguments = saved_data.get("arguments", {})
-	enum_selections = saved_data.get("enums", [])
+	salt = saved_data.get(&"salt", 0)
+	arguments = saved_data.get(&"arguments", {})
+	enum_selections = saved_data.get(&"enums", [])

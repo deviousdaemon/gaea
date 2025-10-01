@@ -69,7 +69,8 @@ static var _casts_methods: Dictionary[GaeaValue.Type, Dictionary] = {
 		GaeaValue.Type.VECTOR3:  func(value: Dictionary): return Vector3(value.get("min"), value.get("max"), 0.0),
 		GaeaValue.Type.VECTOR3I: func(value: Dictionary): return Vector3i(roundi(value.get("min")), roundi(value.get("max")), 0),
 	},
-}
+} :
+	get = get_cast_methods
 
 
 ## Return the castable types, the inner array is a tuple with [code][from, to][/code]. Both of type [enum GaeaValue.Type].
@@ -79,6 +80,11 @@ static func get_cast_list() -> Array[Array]:
 		for to in _casts_methods.get(from).keys():
 			casts.append([from, to])
 	return casts
+
+
+## Returns [member _casts_methods].
+static func get_cast_methods() -> Dictionary[GaeaValue.Type, Dictionary]:
+	return _casts_methods
 
 
 ## Transforms [param value] from [param from_type] to [param to_type]. If there's no way to do so,

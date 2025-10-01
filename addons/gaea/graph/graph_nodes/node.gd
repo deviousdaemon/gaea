@@ -5,8 +5,6 @@ extends GraphNode
 
 const _PreviewTexture = preload("res://addons/gaea/graph/components/preview_texture.gd")
 
-## Emitted when a save is needed from the Gaea panel.
-signal save_requested
 ## Emitted when connections to this node are updated.
 signal connections_updated
 ## Emitted when this node is removed from the graph.
@@ -82,6 +80,7 @@ func _on_added() -> void:
 	title = resource.get_title()
 	if resource.salt == 0:
 		resource.salt = randi()
+		generator.data.set_node_data_value(resource.id, &"salt", resource.salt)
 
 
 func _rebuild() -> void:
@@ -95,7 +94,7 @@ func _rebuild() -> void:
 
 	var saved_data := {}
 	if _finished_loading:
-		saved_data = get_save_data()
+		saved_data = generator.data.get_node_data(resource.id)
 		resource.enum_selections = saved_data.get("enums", [])
 	_editors.clear()
 
@@ -260,15 +259,16 @@ func _set_arg_value(arg_name: StringName, value: Variant) -> void:
 func _on_argument_value_changed(value: Variant, _node: GaeaGraphNodeArgumentEditor, arg_name: String) -> void:
 	if _finished_loading:
 		resource.set_argument_value(arg_name, value)
-		save_requested.emit()
+		generator.data.set_node_argument(resource.id, arg_name, value)
 		if is_instance_valid(_preview):
 			_preview.update()
 
 
 func _on_enum_value_changed(option_idx: int, enum_idx: int, button: OptionButton) -> void:
 	if _finished_loading:
-		resource.set_enum_value(enum_idx, button.get_item_id(option_idx))
-		save_requested.emit()
+		var value := button.get_item_id(option_idx)
+		resource.set_enum_value(enum_idx, value)
+		generator.data.set_node_enum(resource.id, enum_idx, value)
 		if is_instance_valid(_preview):
 			_preview.update()
 
@@ -296,10 +296,6 @@ func _on_removed() -> void:
 	pass
 
 
-func _request_save() -> void:
-	save_requested.emit()
-
-
 ## Emit [signal connections_updated].
 func notify_connections_updated() -> void:
 	connections_updated.emit()
@@ -318,47 +314,19 @@ func auto_shrink() -> void:
 		slot_updated.emit.call_deferred(i)
 
 
-## Returns the data to be saved to [GaeaGraph]. Includes [member Node.name], [member GraphElement.position_offset] and [member GaeaNodeResource.salt].
-func get_save_data() -> Dictionary:
-	var dictionary: Dictionary = {
-		"name": name,
-		"position": position_offset,
-		"salt": resource.salt
-	}
-	dictionary.set(&"arguments", {})
-	for argument in resource.get_arguments_list():
-		var value: Variant = get_arg_value(argument)
-		if value == null:
-			continue
-		if typeof(value) != typeof(resource.get_argument_default_value(argument)):
-			dictionary[&"arguments"][argument] = resource.get_argument_default_value(argument)
-			continue
-		if value != resource.get_argument_default_value(argument):
-			dictionary[&"arguments"][argument] = get_arg_value(argument)
-
-	dictionary.set(&"enums", [])
-	for enum_idx in resource.get_enums_count():
-		if _enum_editors.size() <= enum_idx:
-			dictionary[&"enums"].append(resource.get_enum_default_value(enum_idx))
-		else:
-			dictionary[&"enums"].append(_enum_editors[enum_idx].get_selected_id())
-
-	return dictionary
-
-
 ## Loads data with the same format as seen in [method get_save_data].
 func load_save_data(saved_data: Dictionary) -> void:
-	if saved_data.has("position"):
+	if saved_data.has(&"position"):
 		position_offset = saved_data.position
 
-	if saved_data.has("enums"):
-		for enum_idx: int in saved_data.get("enums").size():
+	if saved_data.has(&"enums"):
+		for enum_idx: int in saved_data.get(&"enums").size():
 			_enum_editors[enum_idx].select(
 				_enum_editors[enum_idx].get_item_index(saved_data.get("enums")[enum_idx])
 			)
 
-	if saved_data.has("arguments"):
-		var arguments = saved_data.get("arguments")
+	if saved_data.has(&"arguments"):
+		var arguments = saved_data.get(&"arguments")
 		for argument: StringName in resource.get_arguments_list():
 			var editor: GaeaGraphNodeArgumentEditor = _editors.get(argument)
 			if not is_instance_valid(editor):
@@ -387,6 +355,7 @@ func _make_custom_tooltip(for_text: String) -> Object:
 
 	rich_text_label.bbcode_enabled = true
 	rich_text_label.text = GaeaNodeResource.get_formatted_text(for_text)
+	rich_text_label.text += "\n[right][b]ID: %s[/b][/right]" % resource.id
 	rich_text_label.fit_content = true
 	rich_text_label.custom_minimum_size.x = 256.0
 	return rich_text_label
@@ -415,3 +384,7 @@ func has_finished_loading() -> bool:
 
 func has_finished_rebuilding() -> bool:
 	return _finished_rebuilding
+
+
+func _on_dragged(_from: Vector2, to: Vector2) -> void:
+	generator.data.set_node_position(resource.id, to)
