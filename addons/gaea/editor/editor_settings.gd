@@ -22,7 +22,8 @@ const CONFIGURABLE_SLOT_COLORS := {
 	#Stardusk
 	GaeaValue.Type.RECT2: "rect_2",
 	GaeaValue.Type.RECT2I: "rect_2i",
-	GaeaValue.Type.ROOMS: "rooms",
+	GaeaValue.Type.ROOM: "room",
+	GaeaValue.Type.ROOM_ARRAY: "room_array",
 	#END
 	GaeaValue.Type.MATERIAL: "material",
 	GaeaValue.Type.TEXTURE: "texture",

@@ -19,7 +19,6 @@ enum Type {
 	#Stardusk
 	RECT2 = TYPE_RECT2,
 	RECT2I = TYPE_RECT2I,
-	ROOMS = TYPE_ARRAY + TYPE_RECT2I,
 	#End
 	# Simple types from 100 to 199
 	## Formatted the following way:
@@ -32,9 +31,12 @@ enum Type {
 	RANGE = 100,
 	MATERIAL = 101, ## A [GaeaMaterial].
 	TEXTURE = 102, ## A [Texture].
-	# Dictionary types from 200 to 299
+	# Dictionary types from 200 to 249
 	DATA = 200, ## A dictionary of the form [code]{Vector3i: float}[/code].
 	MAP = 201, ## A dictionary of the form [code]{Vector3i: GaeaMaterial}[/code].
+	# Custom Class Types from 250 - 299
+	ROOM = 250,
+	ROOM_ARRAY = 251,
 	# Inner types (can't be on wire) from 300 to 399
 	BITMASK = 300, ## Int representing a bitmask.
 	BITMASK_EXCLUSIVE = 301, ## Same as bitmask but only one bit can be active at once.
@@ -88,8 +90,6 @@ static func get_default_value(type: Type) -> Variant:
 			return Rect2()
 		Type.RECT2I:
 			return Rect2i()
-		Type.ROOMS:
-			return [] as Array[Rect2i]
 		# Simple types
 		Type.RANGE:
 			return {"min": 0.0, "max": 1.0} as Dictionary[String, float]
@@ -97,6 +97,11 @@ static func get_default_value(type: Type) -> Variant:
 			return {} as Dictionary[Vector3i, float]
 		Type.MAP:
 			return {} as Dictionary[Vector3i, GaeaMaterial]
+		# Custom Class Types
+		Type.ROOM:
+			return null
+		Type.ROOM_ARRAY:
+			return [] as Array[Rect2i]
 		# Inner types
 		Type.NEIGHBORS:
 			return [] as Array[Vector2i]
@@ -185,6 +190,9 @@ static func get_default_color(type: Type) -> Color:
 			return Color("27ae60") # GREEN
 		Type.TEXTURE:
 			return Color("e67e22") # ORANGE
+		# Custom Class Types
+		Type.ROOM, Type.ROOM_ARRAY:
+			return Color("f0f8ff") # WHITE
 	return Color.WHITE
 
 
@@ -211,8 +219,10 @@ static func get_display_icon(type: Type) -> Texture2D:
 			return load("uid://ttk2j78hpfpw")
 		Type.RECT2I:
 			return load("uid://coh3qh4exp0qn")
-		Type.ROOMS:
+		Type.ROOM:
 			return load("uid://c77teu4hn8cuw")
+		Type.ROOM_ARRAY:
+			return load("uid://covr8rg5dbyfo")
 		# Simple types
 		Type.RANGE:
 			return load("uid://wx4ccwofr8yy")
@@ -257,7 +267,7 @@ static func get_default_slot_icon(type: Type) -> Texture2D:
 		Type.TEXTURE:
 			return load("uid://ccqq5l0ruur37")
 		# Dictionary types
-		Type.DATA, Type.ROOMS:
+		Type.DATA, Type.ROOM, Type.ROOM_ARRAY:
 			return load("uid://yo87adchyr3w")
 		Type.MAP:
 			return load("uid://d2rmsal7c6sdi")

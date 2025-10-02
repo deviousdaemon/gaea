@@ -26,7 +26,14 @@ the starting room index,
 and the ending room index"""
 
 func _get_arguments_list() -> Array[StringName]:
-	return [ &"room_size_min", &"room_size_max", &"min_room_spacing", &"room_density", &"room_extra_connection_chance" ]
+	return [ 
+	&"room_size_min",
+	&"room_size_max",
+	&"min_room_spacing",
+	&"room_density",
+	&"room_extra_connection_chance"
+	
+]
 
 func _get_argument_type(arg_name: StringName) -> GaeaValue.Type:
 	match arg_name:
@@ -60,7 +67,7 @@ func _get_output_ports_list() -> Array[StringName]: return [
 func _get_output_port_type(output_name: StringName) -> GaeaValue.Type:
 	match output_name:
 		&"grid_data": return GaeaValue.Type.DATA
-		&"rooms": return GaeaValue.Type.ROOMS
+		&"rooms": return GaeaValue.Type.ROOM_ARRAY
 		&"start_room_index", &"end_room_index": return GaeaValue.Type.INT
 		_: return GaeaValue.Type.NULL
 
@@ -79,7 +86,7 @@ func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant
 	room_density = _get_arg(&"room_density", area, graph) as float
 	room_extra_connection_chance = (_get_arg(&"room_extra_connection_chance", area, graph) as float) / 100.0
 	
-	var rooms: Array[DungeonRoom] = _generate_rooms(rng, grid_size, max_room_attempts)
+	var rooms: Array[GaeaRoom] = _generate_rooms(rng, grid_size, max_room_attempts)
 	
 	if not is_equal_approx(room_density, 1.0):
 		var max_rooms: int = maxi(floori(float(rooms.size()) * room_density), 2)
@@ -109,7 +116,7 @@ func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant
 	var grid_data: Array[Dictionary]
 	
 	for i in rooms.size():
-		var a: DungeonRoom = rooms[i]
+		var a: GaeaRoom = rooms[i]
 		
 		var outer_start: Vector2i = a.start - Vector2i.ONE
 		var outer_end: Vector2i = a.end + Vector2i(2, 2)
@@ -124,7 +131,7 @@ func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant
 		var g_dict: Dictionary[int, float]
 		for j in rooms.size():
 			if j == i: continue
-			var b: DungeonRoom = rooms[j]
+			var b: GaeaRoom = rooms[j]
 			if _line_intersects_room(a, b, rooms): continue
 			g_dict[j] = a.center.distance_to(b.center)
 		
@@ -156,8 +163,8 @@ func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant
 		
 		var path: Array[Vector2i] = _get_connection_path(rooms[a_idx], rooms[b_idx], astar)
 		
-		var room_a: DungeonRoom = rooms[a_idx]
-		var room_b: DungeonRoom = rooms[b_idx]
+		var room_a: GaeaRoom = rooms[a_idx]
+		var room_b: GaeaRoom = rooms[b_idx]
 		
 		var dist_thru_room_a: Vector2i = (room_a.get_connection_doorway(room_b) - room_a.center).abs()
 		var dist_thru_room_b: Vector2i = (room_b.get_connection_doorway(room_a) - room_b.center).abs()
@@ -175,12 +182,12 @@ func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant
 	var start_room: int = longest_path_indexes[0]
 	var end_room: int = longest_path_indexes[1]
 	
-	var room_rects: Array[Rect2i]
-	
+	#var room_rects: Array[Rect2i]
+	#
 	# Set Rects to Grid
 	for i in rooms.size():
-		var room: DungeonRoom = rooms[i]
-		room_rects.append(room.rect)
+		var room: GaeaRoom = rooms[i]
+		#room_rects.append(room.rect)
 		var bit_value: int = room.index + 1
 		for y in range(room.rect.position.y, room.rect.end.y): for x in range(room.rect.position.x, room.rect.end.x):
 			_grid[Vector3i(x, y, pos_z)] = bit_value
@@ -188,16 +195,16 @@ func _get_data(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant
 	
 	
 	_set_cached_data(&"grid_data", graph, _grid)
-	_set_cached_data(&"rooms", graph, room_rects)
+	_set_cached_data(&"rooms", graph, rooms)
 	_set_cached_data(&"start_room_index", graph, start_room)
 	_set_cached_data(&"end_room_index", graph, end_room)
 	
 	return _get_cached_data(output_port, graph)
 
-func _generate_rooms(rng: GaeaRNG, grid_size: Vector2i, max_room_attempts: int) -> Array[DungeonRoom]:
+func _generate_rooms(rng: GaeaRNG, grid_size: Vector2i, max_room_attempts: int) -> Array[GaeaRoom]:
 	const MAX_CANDIDATES: int = 8
 	
-	var rooms: Array[DungeonRoom]
+	var rooms: Array[GaeaRoom]
 	
 	var attempt: int = 0
 	
@@ -233,17 +240,17 @@ func _generate_rooms(rng: GaeaRNG, grid_size: Vector2i, max_room_attempts: int) 
 				largest_area = rect.get_area()
 				largest_rect = rect
 		
-		rooms.append(DungeonRoom.new(largest_rect))
+		rooms.append(GaeaRoom.new(largest_rect))
 		
 		pass
 	
 	return rooms
 
 
-func __sort_clockwise(a: DungeonRoom, b: DungeonRoom, center: Vector2i) -> bool:
+func __sort_clockwise(a: GaeaRoom, b: GaeaRoom, center: Vector2i) -> bool:
 	return Vector2(a.get_center() - center).angle() < Vector2(b.get_center() - center).angle()
 
-func _line_intersects_room(from: DungeonRoom, to: DungeonRoom, rooms: Array[DungeonRoom]) -> bool:
+func _line_intersects_room(from: GaeaRoom, to: GaeaRoom, rooms: Array[GaeaRoom]) -> bool:
 	
 	#var to_dir: Vector2 = Vector2(from.center).direction_to(Vector2(to.center)) * (from.center.distance_to(to.center))
 	
@@ -310,7 +317,7 @@ func __get_closest_index(connected_indexes: PackedInt32Array, grid_data: Array[D
 	
 	return [starting_index, ending_index]
 
-func _assign_room_connections(rooms: Array[DungeonRoom], grid_data: Array[Dictionary], mst_result: Array[PackedInt32Array]) -> void:
+func _assign_room_connections(rooms: Array[GaeaRoom], grid_data: Array[Dictionary], mst_result: Array[PackedInt32Array]) -> void:
 	for pair in mst_result:
 		var a: int = pair[0]
 		var b: int = pair[1]
@@ -319,7 +326,7 @@ func _assign_room_connections(rooms: Array[DungeonRoom], grid_data: Array[Dictio
 		pass
 	pass
 
-func _get_connection_path(a: DungeonRoom, b: DungeonRoom, astar: AStarGrid2D) -> Array[Vector2i]:
+func _get_connection_path(a: GaeaRoom, b: GaeaRoom, astar: AStarGrid2D) -> Array[Vector2i]:
 	var closest_sides: Array[Side] = a.get_closest_sides_to(b)
 	var side_start: Side = closest_sides[0]
 	var side_end: Side = closest_sides[1]
@@ -380,7 +387,7 @@ func _get_connection_path(a: DungeonRoom, b: DungeonRoom, astar: AStarGrid2D) ->
 	
 	return start_points + points + end_points
 
-func _get_longest_path(rooms: Array[DungeonRoom], grid_data: Array[Dictionary]) -> PackedInt32Array:
+func _get_longest_path(rooms: Array[GaeaRoom], grid_data: Array[Dictionary]) -> PackedInt32Array:
 	
 	var astar := GraphAStar.new(rooms)
 	for i in rooms.size():
@@ -406,90 +413,90 @@ func _get_longest_path(rooms: Array[DungeonRoom], grid_data: Array[Dictionary]) 
 	
 	return [start_i, end_i]
 
-class DungeonRoom extends RefCounted:
-	const INT_MAX: int = 2147483647
-	const SIDES: Array[Side] = [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]
-
-	var index: int
-	var rect: Rect2i
-	var start: Vector2i
-	var end: Vector2i
-	var size: Vector2i
-	var center: Vector2i
-	var connections: Dictionary[DungeonRoom, float]
-	var doorways: Dictionary[Side, Array]
-
-	var edge_centers: Dictionary[Side, Vector2i]
-
-	func _init(_rect: Rect2i) -> void:
-		rect = _rect
-		start = rect.position
-		end = rect.end
-		size = rect.size
-		center = rect.get_center()
-		
-		doorways = {SIDE_LEFT: [], SIDE_TOP: [], SIDE_RIGHT: [], SIDE_BOTTOM: []}
-		edge_centers = {SIDE_LEFT: Vector2i(start.x, center.y), SIDE_TOP: Vector2i(center.x, start.y), SIDE_RIGHT: Vector2i(end.x, center.y), SIDE_BOTTOM: Vector2i(center.x, end.y)}
-		pass
-
-	func get_index() -> int: return index
-
-	func get_center() -> Vector2i: return center
-
-	func get_closest_center_points_to(other: DungeonRoom) -> Array[Vector2i]:
-		var c_sides: Array[Side] = get_closest_sides_to(other)
-		return [get_edge_center(c_sides[0]), other.get_edge_center(c_sides[1])]
-
-	func get_closest_sides_to(other: DungeonRoom) -> Array[Side]:
-		var c_dist: int = INT_MAX
-		var this_side: Side
-		var other_side: Side
-		for side in SIDES:
-			var edge_center: Vector2i = get_edge_center(side)
-			for o_side in SIDES:
-				var o_edge_center: Vector2i = other.get_edge_center(o_side)
-				var dist: float = edge_center.distance_to(o_edge_center)
-				if dist < c_dist:
-					c_dist = dist
-					this_side = side
-					other_side = o_side
-					pass
-				pass
-		return [this_side, other_side]
-	func get_edge_center(side: Side) -> Vector2i:
-		return edge_centers[side]
-
-	func get_edge_lines() -> Array[PackedVector2Array]:
-		var edge_lines: Array[PackedVector2Array]
-		
-		for side in SIDES:
-			match side:
-				SIDE_LEFT:
-					edge_lines.append(PackedVector2Array([ Vector2(start), Vector2(start.x, end.y) ]))
-				SIDE_TOP:
-					edge_lines.append(PackedVector2Array([ Vector2(start), Vector2(end.x, start.y) ]))
-				SIDE_RIGHT:
-					edge_lines.append(PackedVector2Array([ Vector2(end.x, start.y), Vector2(end) ]))
-				SIDE_BOTTOM:
-					edge_lines.append(PackedVector2Array([ Vector2(start.x, end.y), Vector2(end) ]))
-		
-		return edge_lines
-
-	func get_connection_doorway(other: DungeonRoom) -> Vector2i:
-		var side: int = -1
-		for o_side in doorways.keys():
-			if doorways[o_side].has(other):
-				side = o_side as int
-				break
-		if side == -1: return center
-		return get_edge_center(side as Side)
-
-	func get_sides_with_connections() -> Array[Side]:
-		var sides: Array[Side]
-		for side in doorways:
-			if not doorways[side]: continue
-			sides.append(side)
-		return sides
+#class GaeaRoom extends RefCounted:
+	#const INT_MAX: int = 2147483647
+	#const SIDES: Array[Side] = [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]
+#
+	#var index: int
+	#var rect: Rect2i
+	#var start: Vector2i
+	#var end: Vector2i
+	#var size: Vector2i
+	#var center: Vector2i
+	#var connections: Dictionary[GaeaRoom, float]
+	#var doorways: Dictionary[Side, Array]
+#
+	#var edge_centers: Dictionary[Side, Vector2i]
+#
+	#func _init(_rect: Rect2i) -> void:
+		#rect = _rect
+		#start = rect.position
+		#end = rect.end
+		#size = rect.size
+		#center = rect.get_center()
+		#
+		#doorways = {SIDE_LEFT: [], SIDE_TOP: [], SIDE_RIGHT: [], SIDE_BOTTOM: []}
+		#edge_centers = {SIDE_LEFT: Vector2i(start.x, center.y), SIDE_TOP: Vector2i(center.x, start.y), SIDE_RIGHT: Vector2i(end.x, center.y), SIDE_BOTTOM: Vector2i(center.x, end.y)}
+		#pass
+#
+	#func get_index() -> int: return index
+#
+	#func get_center() -> Vector2i: return center
+#
+	#func get_closest_center_points_to(other: GaeaRoom) -> Array[Vector2i]:
+		#var c_sides: Array[Side] = get_closest_sides_to(other)
+		#return [get_edge_center(c_sides[0]), other.get_edge_center(c_sides[1])]
+#
+	#func get_closest_sides_to(other: GaeaRoom) -> Array[Side]:
+		#var c_dist: int = INT_MAX
+		#var this_side: Side
+		#var other_side: Side
+		#for side in SIDES:
+			#var edge_center: Vector2i = get_edge_center(side)
+			#for o_side in SIDES:
+				#var o_edge_center: Vector2i = other.get_edge_center(o_side)
+				#var dist: float = edge_center.distance_to(o_edge_center)
+				#if dist < c_dist:
+					#c_dist = dist
+					#this_side = side
+					#other_side = o_side
+					#pass
+				#pass
+		#return [this_side, other_side]
+	#func get_edge_center(side: Side) -> Vector2i:
+		#return edge_centers[side]
+#
+	#func get_edge_lines() -> Array[PackedVector2Array]:
+		#var edge_lines: Array[PackedVector2Array]
+		#
+		#for side in SIDES:
+			#match side:
+				#SIDE_LEFT:
+					#edge_lines.append(PackedVector2Array([ Vector2(start), Vector2(start.x, end.y) ]))
+				#SIDE_TOP:
+					#edge_lines.append(PackedVector2Array([ Vector2(start), Vector2(end.x, start.y) ]))
+				#SIDE_RIGHT:
+					#edge_lines.append(PackedVector2Array([ Vector2(end.x, start.y), Vector2(end) ]))
+				#SIDE_BOTTOM:
+					#edge_lines.append(PackedVector2Array([ Vector2(start.x, end.y), Vector2(end) ]))
+		#
+		#return edge_lines
+#
+	#func get_connection_doorway(other: GaeaRoom) -> Vector2i:
+		#var side: int = -1
+		#for o_side in doorways.keys():
+			#if doorways[o_side].has(other):
+				#side = o_side as int
+				#break
+		#if side == -1: return center
+		#return get_edge_center(side as Side)
+#
+	#func get_sides_with_connections() -> Array[Side]:
+		#var sides: Array[Side]
+		#for side in doorways:
+			#if not doorways[side]: continue
+			#sides.append(side)
+		#return sides
 
 class DungeonAStar extends AStarGrid2D:
 	var rng: GaeaRNG
@@ -539,12 +546,12 @@ class DungeonAStar extends AStarGrid2D:
 
 class GraphAStar extends AStar2D:
 
-	var rooms: Array[DungeonRoom]
+	var rooms: Array[GaeaRoom]
 
 	## Array[ Dictionary[ to: int, weight ] ]
 	var connection_distances: Array[Dictionary]
 
-	func _init(_rooms: Array[DungeonRoom]) -> void:
+	func _init(_rooms: Array[GaeaRoom]) -> void:
 		rooms = _rooms
 		connection_distances.resize(rooms.size())
 		pass
