@@ -49,6 +49,7 @@ func _on_argument_value_changed(value: Variant, _node: GaeaGraphNodeArgumentEdit
 
 	if generator.data.rename_parameter(current_name, value) == OK:
 		current_name = value
+		generator.data.set_node_argument(resource.id, &"name", current_name)
 
 
 
