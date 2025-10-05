@@ -21,7 +21,7 @@ func _get_title() -> String: return "DungeonCreator"
 func _get_description() -> String:
 	return """Generates Rooms and Hallways.
 Returns a [code]Dictionary[Vector3i, room_index + 1 or 0][/code] of [data],
-a [code]Array[Rect2i][/code] of [rooms],
+an [code]Array[GaeaRoom][/code],
 the starting room index,
 and the ending room index"""
 
@@ -412,91 +412,6 @@ func _get_longest_path(rooms: Array[GaeaRoom], grid_data: Array[Dictionary]) -> 
 				end_i = b
 	
 	return [start_i, end_i]
-
-#class GaeaRoom extends RefCounted:
-	#const INT_MAX: int = 2147483647
-	#const SIDES: Array[Side] = [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]
-#
-	#var index: int
-	#var rect: Rect2i
-	#var start: Vector2i
-	#var end: Vector2i
-	#var size: Vector2i
-	#var center: Vector2i
-	#var connections: Dictionary[GaeaRoom, float]
-	#var doorways: Dictionary[Side, Array]
-#
-	#var edge_centers: Dictionary[Side, Vector2i]
-#
-	#func _init(_rect: Rect2i) -> void:
-		#rect = _rect
-		#start = rect.position
-		#end = rect.end
-		#size = rect.size
-		#center = rect.get_center()
-		#
-		#doorways = {SIDE_LEFT: [], SIDE_TOP: [], SIDE_RIGHT: [], SIDE_BOTTOM: []}
-		#edge_centers = {SIDE_LEFT: Vector2i(start.x, center.y), SIDE_TOP: Vector2i(center.x, start.y), SIDE_RIGHT: Vector2i(end.x, center.y), SIDE_BOTTOM: Vector2i(center.x, end.y)}
-		#pass
-#
-	#func get_index() -> int: return index
-#
-	#func get_center() -> Vector2i: return center
-#
-	#func get_closest_center_points_to(other: GaeaRoom) -> Array[Vector2i]:
-		#var c_sides: Array[Side] = get_closest_sides_to(other)
-		#return [get_edge_center(c_sides[0]), other.get_edge_center(c_sides[1])]
-#
-	#func get_closest_sides_to(other: GaeaRoom) -> Array[Side]:
-		#var c_dist: int = INT_MAX
-		#var this_side: Side
-		#var other_side: Side
-		#for side in SIDES:
-			#var edge_center: Vector2i = get_edge_center(side)
-			#for o_side in SIDES:
-				#var o_edge_center: Vector2i = other.get_edge_center(o_side)
-				#var dist: float = edge_center.distance_to(o_edge_center)
-				#if dist < c_dist:
-					#c_dist = dist
-					#this_side = side
-					#other_side = o_side
-					#pass
-				#pass
-		#return [this_side, other_side]
-	#func get_edge_center(side: Side) -> Vector2i:
-		#return edge_centers[side]
-#
-	#func get_edge_lines() -> Array[PackedVector2Array]:
-		#var edge_lines: Array[PackedVector2Array]
-		#
-		#for side in SIDES:
-			#match side:
-				#SIDE_LEFT:
-					#edge_lines.append(PackedVector2Array([ Vector2(start), Vector2(start.x, end.y) ]))
-				#SIDE_TOP:
-					#edge_lines.append(PackedVector2Array([ Vector2(start), Vector2(end.x, start.y) ]))
-				#SIDE_RIGHT:
-					#edge_lines.append(PackedVector2Array([ Vector2(end.x, start.y), Vector2(end) ]))
-				#SIDE_BOTTOM:
-					#edge_lines.append(PackedVector2Array([ Vector2(start.x, end.y), Vector2(end) ]))
-		#
-		#return edge_lines
-#
-	#func get_connection_doorway(other: GaeaRoom) -> Vector2i:
-		#var side: int = -1
-		#for o_side in doorways.keys():
-			#if doorways[o_side].has(other):
-				#side = o_side as int
-				#break
-		#if side == -1: return center
-		#return get_edge_center(side as Side)
-#
-	#func get_sides_with_connections() -> Array[Side]:
-		#var sides: Array[Side]
-		#for side in doorways:
-			#if not doorways[side]: continue
-			#sides.append(side)
-		#return sides
 
 class DungeonAStar extends AStarGrid2D:
 	var rng: GaeaRNG

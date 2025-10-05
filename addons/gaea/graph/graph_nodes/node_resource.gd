@@ -432,7 +432,7 @@ func traverse(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant:
 ## Returns the data corresponding to [param output_port]. Should be overridden to create custom
 ## behavior for each node.
 @abstract
-func _get_data(_output_port: StringName, _area: AABB, _graph: GaeaGraph) -> Variant
+func _get_data(_output_port: StringName, _area: AABB, _graph: GaeaGraph) -> Variant;
 #endregion
 
 

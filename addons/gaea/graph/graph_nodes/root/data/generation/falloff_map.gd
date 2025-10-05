@@ -88,7 +88,7 @@ enum FalloffShape {
 			return 0.0
 		return smoothstep(1.0, 0.0, inverse_lerp(start, end, value))
 
-	@abstract func _get_sample(_x: int, _y: int) -> float
+	@abstract func _get_sample(_x: int, _y: int) -> float;
 
 
 class FalloffSamplerSquare:
