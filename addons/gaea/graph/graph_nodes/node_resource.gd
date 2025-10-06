@@ -54,10 +54,12 @@ var enum_selections: Array
 ## An additional value added to the generation's seed to prevent
 ## duplicates of the same node from having the same randomness. (See [member GaeaGenerator.seed]).
 var salt: int = 0
+## The RandomNumberGenerator that gets defined every time data is asked of this node.
+var rng: RandomNumberGenerator
 ## Id in the [GaeaGraph] save data.
 var id: int = 0
 ## If empty, [method _get_title] will be used instead.
-var tree_name_override: String = "" : set = set_tree_name_override
+var tree_name_override: String = "": set = set_tree_name_override
 @export_storage var default_value_overrides: Dictionary[StringName, Variant]
 @export_storage var default_enum_value_overrides: Dictionary[int, int]
 
@@ -364,11 +366,6 @@ func _on_argument_value_changed(arg_name: StringName, new_value: Variant) -> voi
 	return
 
 
-
-
-
-
-
 #region Args
 ## Returns the value of the argument of [param name]. Pass in [param graph] to allow overriding with input slots.[br]
 ## [param area] is used for values of the type Data or Map. (See [enum GaeaValue.Type]).
@@ -407,26 +404,26 @@ func _get_arg(arg_name: StringName, area: AABB, graph: GaeaGraph) -> Variant:
 func traverse(output_port: StringName, area: AABB, graph: GaeaGraph) -> Variant:
 	_log_traverse(graph)
 
-	# Caching
-	var use_caching = _use_caching(output_port, graph)
-	if use_caching and _has_cached_data(output_port, graph):
-		return _get_cached_data(output_port, graph)
-
 	# Validation
 	if not _has_inputs_connected(_get_required_arguments(), graph):
 		return {}
 
-	# Get Data
+	# Get Data with caching
+	var data: Variant
+	var use_caching = _use_caching(output_port, graph)
+	if use_caching and _has_cached_data(output_port, graph):
+		data = _get_cached_data(output_port, graph)
+	else:
+		_define_rng(graph)
+		_log_data(output_port, graph)
+		data = _get_data(output_port, area, graph)
+		if use_caching:
+			_set_cached_data(output_port, graph, data)
 
-	_log_data(output_port, graph)
-	var results: Dictionary = {
-		&"value": _get_data(output_port, area, graph),
+	return {
+		&"value": data,
 		&"type": _get_output_port_type(output_port)
 	}
-
-	if use_caching:
-		_set_cached_data(output_port, graph, results)
-	return results
 
 
 ## Returns the data corresponding to [param output_port]. Should be overridden to create custom
@@ -445,18 +442,19 @@ func _use_caching(_output_port: StringName, _graph: GaeaGraph) -> bool:
 ## Adds or sets data to the cache at GaeaNodeResource, then output_port index.
 ## This is called during [method traverse] if [method _use_caching] returns [code]true[/code],
 ## but can also be called in special cases where you want to manually add cached values.
-func _set_cached_data(output_port: StringName, graph: GaeaGraph, new_data:Variant) -> void:
-	var node_cache:Dictionary = graph.cache.get_or_add(self, {})
+func _set_cached_data(output_port: StringName, graph: GaeaGraph, new_data: Variant) -> void:
+	var node_cache: Dictionary = graph.cache.get_or_add(self, {})
 	node_cache[output_port] = new_data
 
 
-# Checks if the cache has data corresponding to this node, then if it has it for output_port.
+## Checks if the cache has data corresponding to this node, then if it has it for output_port.
 func _has_cached_data(output_port: StringName, graph: GaeaGraph) -> bool:
 	return graph.cache.has(self) and graph.cache[self].has(output_port)
 
 
-# Gets cached data by GaeaNodeResource, then output_port index.
-# Assumes that data exists, will error out if it doesn't.
+## Gets cached data by GaeaNodeResource, then output_port index.
+## Assumes that data exists, will error out if it doesn't.
+## See also [method has_cached_data]
 func _get_cached_data(output_port: StringName, graph: GaeaGraph) -> Variant:
 	return graph.cache[self][output_port]
 #endregion
@@ -530,7 +528,7 @@ func connection_idx_to_output(output_idx: int) -> StringName:
 
 #region Logging
 # If enabled in [member GaeaGraph.logging], log the execution information. (See [enum GaeaGraph.Log]).
-func _log_execute(message:String, area:AABB, graph: GaeaGraph):
+func _log_execute(message: String, area: AABB, graph: GaeaGraph):
 	if is_instance_valid(graph) and graph.logging & GaeaGraph.Log.EXECUTE > 0:
 		message = message.strip_edges()
 		message = message if message == "" else message + " "
@@ -538,7 +536,7 @@ func _log_execute(message:String, area:AABB, graph: GaeaGraph):
 
 
 # If enabled in [member GaeaGraph.logging], log the layer information. (See [enum GaeaGraph.Log]).
-func _log_layer(message:String, layer:int, graph: GaeaGraph):
+func _log_layer(message: String, layer: int, graph: GaeaGraph):
 	if is_instance_valid(graph) and graph.logging & GaeaGraph.Log.EXECUTE > 0:
 		message = message.strip_edges()
 		message = message if message == "" else message + " "
@@ -558,7 +556,7 @@ func _log_data(output_port: StringName, graph: GaeaGraph):
 
 
 # If enabled in [member GaeaGraph.logging], log the argument information. (See [enum GaeaGraph.Log]).
-func _log_arg(arg:String, graph: GaeaGraph):
+func _log_arg(arg: String, graph: GaeaGraph):
 	if is_instance_valid(graph) and graph.logging & GaeaGraph.Log.ARGS > 0:
 		print("Arg       |   %s on %s" % [arg, _get_title()])
 
@@ -567,7 +565,7 @@ func _log_arg(arg:String, graph: GaeaGraph):
 ## If a [param node_idx] is provided, it will display the path and position of the node.
 ## Otherwise, it will display the path of the resource.
 ## The [param node_idx] is the index of the node in the graph.resources array.
-func _log_error(message:String, graph: GaeaGraph, node_idx: int = -1):
+func _log_error(message: String, graph: GaeaGraph, node_idx: int = -1):
 	if node_idx >= 0:
 		printerr("%s:%s in node '%s' - %s" % [
 			graph.get_node(node_idx).resource_path,
@@ -641,11 +639,9 @@ func _is_point_outside_area(area: AABB, point: Vector3) -> bool:
 			point.x > area.end.x or point.y > area.end.y or point.z > area.end.z)
 
 func define_rng(graph: GaeaGraph) -> GaeaRNG:
-	#var rng = RandomNumberGenerator.new()
-	#rng.set_seed(graph.generator.seed + salt)
-	seed(graph.generator.seed + salt)
+	var rng: = GaeaRNG.new(graph.generator.seed + salt)
+	seed(rng.seed)
 	return GaeaRNG.new(graph.generator.seed + salt)
-#endregion
 
 
 func load_save_data(saved_data: Dictionary) -> void:
