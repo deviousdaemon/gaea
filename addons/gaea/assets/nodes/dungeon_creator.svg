@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="16"
+   height="16"
+   viewBox="0 0 16 16"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   inkscape:export-filename="icon_minus_32x.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   sodipodi:docname="dungeon_creator.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="px"
+     showgrid="true"
+     inkscape:zoom="35.664698"
+     inkscape:cx="7.5144334"
+     inkscape:cy="7.2480636"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       empspacing="4"
+       type="xygrid"
+       id="grid9"
+       originx="0"
+       originy="0"
+       spacingy="1"
+       spacingx="1"
+       units="px"
+       empcolor="#5cb8e5"
+       empopacity="0.34901961"
+       color="#0099e5"
+       opacity="0.16078431" />
+    <inkscape:grid
+       id="grid1"
+       units="px"
+       originx="0"
+       originy="0"
+       spacingx="0.5"
+       spacingy="0.5"
+       empcolor="#0099e5"
+       empopacity="0.09803922"
+       color="#38708c"
+       opacity="0.16862745"
+       empspacing="1"
+       enabled="true"
+       visible="true"
+       dotted="true" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="rect1"
+       style="fill:none;stroke:#ffffff;stroke-linecap:square;stroke-miterlimit:5;paint-order:fill markers stroke;stroke-opacity:1"
+       d="m 1.5,1.5 h 4 v 6 h -4 z" />
+    <path
+       id="rect2"
+       style="fill:none;stroke:#ffffff;stroke-linecap:square;stroke-miterlimit:5;stroke-opacity:1;paint-order:fill markers stroke"
+       d="m 2.5,10.5 h 5 v 4 h -5 z"
+       transform="translate(-1)" />
+    <path
+       id="rect3"
+       style="fill:none;stroke:#ffffff;stroke-linecap:square;stroke-miterlimit:5;paint-order:fill markers stroke;stroke-opacity:1"
+       d="m 10.5,10.5 h 4 v 4 h -4 z" />
+    <path
+       id="rect4"
+       style="fill:none;stroke:#ffffff;stroke-linecap:square;stroke-miterlimit:5;paint-order:fill markers stroke;stroke-opacity:1"
+       d="m 8.5,1.5 h 6 v 5 h -6 z"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-linecap:square;stroke-miterlimit:5;paint-order:fill markers stroke;stroke-opacity:1"
+       d="m 5.5,4.5 c 0,0 3,0 3,0"
+       id="path4" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-linecap:square;stroke-miterlimit:5;paint-order:fill markers stroke;stroke-opacity:1"
+       d="m 12.5,10.5 v -4"
+       id="path5" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-linecap:square;stroke-miterlimit:5;paint-order:fill markers stroke;stroke-opacity:1"
+       d="m 7.5,12.5 h 3"
+       id="path6" />
+  </g>
+</svg>

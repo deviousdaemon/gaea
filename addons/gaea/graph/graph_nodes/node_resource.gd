@@ -625,8 +625,10 @@ static func get_formatted_text(unformatted_text: String) -> String:
 
 ## Returns the corresponding type icon.
 func get_icon() -> Texture2D:
-	return GaeaValue.get_display_icon(get_type())
+	var v_icon: Texture2D = _get_icon()
+	return v_icon if v_icon else GaeaValue.get_display_icon(get_type())
 
+func _get_icon() -> Texture2D: return null
 
 ## Returns the corresponding type color.
 func get_title_color() -> Color:

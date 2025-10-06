@@ -16,24 +16,21 @@ var room_extra_connection_chance: float
 
 var _grid: Dictionary[Vector3i, float]
 
-func _get_title() -> String: return "DungeonCreator"
+func _get_title() -> String:
+	return "DungeonCreator"
+
+func _get_icon() -> Texture2D: return load("uid://bx462hx16fqcb")
 
 func _get_description() -> String:
-	return """Generates Rooms and Hallways.
-Returns a [code]Dictionary[Vector3i, room_index + 1 or 0][/code] of [data],
-an [code]Array[GaeaRoom][/code],
-the starting room index,
-and the ending room index"""
+	return "Generates Rooms and Hallways.\nReturns a [code]Dictionary[Vector3i, room_index + 1 or 0][/code] of [data],\nan [code]Array[GaeaRoom][/code],\nthe starting room index,\nand the ending room index"
 
-func _get_arguments_list() -> Array[StringName]:
-	return [ 
-	&"room_size_min",
-	&"room_size_max",
-	&"min_room_spacing",
-	&"room_density",
-	&"room_extra_connection_chance"
-	
-]
+func _get_arguments_list() -> Array[StringName]: return [
+		&"room_size_min",
+		&"room_size_max",
+		&"min_room_spacing",
+		&"room_density",
+		&"room_extra_connection_chance"
+	]
 
 func _get_argument_type(arg_name: StringName) -> GaeaValue.Type:
 	match arg_name:
@@ -48,21 +45,22 @@ func _get_argument_default_value(arg_name: StringName) -> Variant:
 		&"min_room_spacing": return Vector2i(4, 4)
 		&"room_density": return 1.0
 		&"room_extra_connection_chance": return 0.0
-		_: return super(arg_name)
+	return super(arg_name)
 
 func _get_argument_hint(arg_name: StringName) -> Dictionary[String, Variant]:
 	match arg_name:
-		&"room_size_min": return {min=Vector2i(3, 3)}
-		&"min_room_spacing": return {min=Vector2i(4, 4)}
-		&"room_density": return {min=0.01,max=1.0}
-		&"room_extra_connection_chance": return {min=0.0,max=_EXTRA_ROOM_CONNECTION_MAX, suffix="%"}
-		_: return super(arg_name)
+		&"room_size_min": return {"min":Vector2i(3, 3)}
+		&"min_room_spacing": return {"min":Vector2i(4, 4)}
+		&"room_density": return {"min":0.01,"max":1.0}
+		&"room_extra_connection_chance": return {"min":0.0,"max":_EXTRA_ROOM_CONNECTION_MAX, "suffix":"%"}
+	return super(arg_name)
 
 func _get_output_ports_list() -> Array[StringName]: return [
-	&"grid_data",
-	&"rooms",
 	&"start_room_index",
-	&"end_room_index"]
+	&"end_room_index",
+	&"rooms",
+	&"grid_data",
+	]
 
 func _get_output_port_type(output_name: StringName) -> GaeaValue.Type:
 	match output_name:

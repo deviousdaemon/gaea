@@ -81,7 +81,6 @@ func _populate_dict_with_files(folder_path: String, dict: Dictionary) -> Diction
 		if dir.current_is_dir():
 			_populate_dict_with_files(file_path + "/", dict.get_or_add(tree_name, {}))
 
-
 		if file_name.ends_with(".gd"):
 			var script := load(file_path)
 			if script is GDScript:
